@@ -1,0 +1,4 @@
+{
+  "port": 5001,
+  "dbFile": "db/GeoLite2-City.mmdb"
+}
