@@ -29,10 +29,11 @@ func setupTest(t *testing.T) {
 	}
 }
 
+// lookup test
 func TestValidLookup(t *testing.T) {
 	setupTest(t)
 
-	url := fmt.Sprintf("http://localhost:%v?ip=67.188.210.242", c.Port)
+	url := fmt.Sprintf("http://localhost:%v/lookup?ip=67.188.210.242", c.Port)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Error("error creating request", err)
@@ -64,10 +65,10 @@ func TestValidLookup(t *testing.T) {
 	}
 }
 
-func Test404(t *testing.T) {
+func TestLookup404(t *testing.T) {
 	setupTest(t)
 
-	url := fmt.Sprintf("http://localhost:%v?ip=67.188.210.242", c.Port)
+	url := fmt.Sprintf("http://localhost:%v/lookup?ip=67.188.210.242", c.Port)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		t.Error("error creating request", err)
@@ -83,7 +84,7 @@ func Test404(t *testing.T) {
 func TestInvalidIp(t *testing.T) {
 	setupTest(t)
 
-	url := fmt.Sprintf("http://localhost:%v?ip=invalid", c.Port)
+	url := fmt.Sprintf("http://localhost:%v/lookup?ip=invalid", c.Port)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Error("error creating request", err)
@@ -91,6 +92,56 @@ func TestInvalidIp(t *testing.T) {
 
 	res := httptest.NewRecorder()
 	handleLookup(res, req)
+	if res.Code != 400 {
+		t.Error("StatusCode should be 400", res.Code)
+	}
+}
+
+// distance test
+func TestValidDistance(t *testing.T) {
+	setupTest(t)
+
+	url := fmt.Sprintf("http://localhost:%v/distance?latlng1=37.7797,-122.417&latlng2=37.8116,-122.242", c.Port)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		t.Error("error creating request", err)
+	}
+
+	res := httptest.NewRecorder()
+	handleDistance(res, req)
+
+	if res.Body.String() != "{\"distance\": 9.81}" {
+		t.Error("expected distance to be 9.81", res.Body.String())
+	}
+}
+
+func TestDistance404(t *testing.T) {
+	setupTest(t)
+
+	url := fmt.Sprintf("http://localhost:%v/distance?latlng1=37.7797,-122.417&latlng2=37.8116,-122.242", c.Port)
+	req, err := http.NewRequest("POST", url, nil)
+	if err != nil {
+		t.Error("error creating request", err)
+	}
+
+	res := httptest.NewRecorder()
+	handleDistance(res, req)
+	if res.Code != 404 {
+		t.Error("StatusCode should be 404", res.Code)
+	}
+}
+
+func TestInvalidLatLng(t *testing.T) {
+	setupTest(t)
+
+	url := fmt.Sprintf("http://localhost:%v/distance?latlng1=invalid,-122.417&latlng2=37.8116,-122.242", c.Port)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		t.Error("error creating request", err)
+	}
+
+	res := httptest.NewRecorder()
+	handleDistance(res, req)
 	if res.Code != 400 {
 		t.Error("StatusCode should be 400", res.Code)
 	}

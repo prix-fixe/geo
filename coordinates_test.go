@@ -10,3 +10,25 @@ func TestGreatCircleDistance(t *testing.T) {
 		t.Error("expected distance to be 9.806118100713892", d)
 	}
 }
+
+func TestParseCoordinates(t *testing.T) {
+	c, err := ParseCoordinates("37.7797,-122.417")
+	if err != nil {
+		t.Error("unexpected error!")
+	}
+	if c.Latitude != 37.7797 {
+		t.Error("expected latitude to be 37.7797", c)
+	}
+	if c.Longitude != -122.417 {
+		t.Error("expected latitude to be -122.417", c)
+	}
+
+	c, err = ParseCoordinates("-122.417")
+	if err == nil {
+		t.Error("expected invalid format error")
+	}
+	c, err = ParseCoordinates("invalid,-122.417")
+	if err == nil {
+		t.Error("expected not a number error")
+	}
+}

@@ -1,6 +1,12 @@
 package main
 
-import "math"
+import (
+	"errors"
+	"fmt"
+	"math"
+	"strconv"
+	"strings"
+)
 
 const (
 	earthRadius      = 3959 // in miles
@@ -10,6 +16,22 @@ const (
 type coordinates struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
+}
+
+func ParseCoordinates(s string) (*coordinates, error) {
+	latlng := strings.Split(s, ",")
+	if len(latlng) != 2 {
+		return nil, errors.New("invalid latlng format")
+	}
+	lat, err := strconv.ParseFloat(latlng[0], 64)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("lat %v is not a number", latlng[0]))
+	}
+	lng, err := strconv.ParseFloat(latlng[1], 64)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("lng %v is not a number", latlng[1]))
+	}
+	return &coordinates{Latitude: lat, Longitude: lng}, nil
 }
 
 // Calculates the Haversine distance between two coordinates in miles.

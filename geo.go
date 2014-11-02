@@ -29,6 +29,7 @@ func main() {
 	}
 
 	http.HandleFunc("/lookup", handleLookup)
+	http.HandleFunc("/distance", handleDistance)
 	err = http.ListenAndServe(fmt.Sprintf(":%v", c.Port), nil)
 	if err != nil {
 		log.Fatal("unable to start server", err)
@@ -70,4 +71,35 @@ func handleLookup(res http.ResponseWriter, req *http.Request) {
 
 	res.Header().Set("Content-Type", "application/json")
 	res.Write(data)
+}
+
+func handleDistance(res http.ResponseWriter, req *http.Request) {
+	if req.Method != "GET" {
+		http.NotFound(res, req)
+		return
+	}
+
+	latlng1 := req.URL.Query().Get("latlng1")
+	latlng2 := req.URL.Query().Get("latlng2")
+	if latlng1 == "" || latlng2 == "" {
+		http.Error(res, "latlng1 and latlng2 are required", 400)
+		return
+	}
+
+	c1, err := ParseCoordinates(latlng1)
+	if err != nil {
+		http.Error(res, fmt.Sprintf("invalid latlng1 format %v:%v", latlng1, err), 400)
+		return
+	}
+
+	c2, err := ParseCoordinates(latlng2)
+	if err != nil {
+		http.Error(res, fmt.Sprintf("invalid latlng2 format %v:%v", latlng2, err), 400)
+		return
+	}
+
+	d := GreatCircleDistance(c1, c2)
+
+	res.Header().Set("Content-Type", "application/json")
+	res.Write([]byte(fmt.Sprintf("{\"distance\": %.2f}", d)))
 }
