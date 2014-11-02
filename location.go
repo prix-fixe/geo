@@ -2,11 +2,6 @@ package main
 
 import "github.com/oschwald/geoip2-golang"
 
-type coordinates struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-}
-
 type location struct {
 	City        string      `json:"city"`
 	Zipcode     string      `json:"zipcode"`
